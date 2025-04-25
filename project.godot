@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="camerafollow"
+config/name="godot_tools"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://camera_follow/icon.svg"
 

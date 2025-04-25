@@ -1,7 +1,7 @@
-[gd_scene load_steps=18 format=3 uid="uid://dwcrvcjpbp7qq"]
+[gd_scene load_steps=17 format=3 uid="uid://dwcrvcjpbp7qq"]
 
-[ext_resource type="Script" uid="uid://c04f3gb1i5yxw" path="res://camera_follow/character_body_3d.gd" id="1_a202f"]
-[ext_resource type="Script" uid="uid://dtwtlmwig4ymd" path="res://camera_follow/follow_camera.gd" id="2_noarx"]
+[ext_resource type="Script" uid="uid://c04f3gb1i5yxw" path="res://camera_follow/character_body_3d.gd" id="1_l7n73"]
+[ext_resource type="Script" uid="uid://dtwtlmwig4ymd" path="res://camera_follow/follow_camera.gd" id="2_2p61m"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_noarx"]
 sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
@@ -19,13 +19,6 @@ glow_enabled = true
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_jsk3o"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_4arys"]
-
-[sub_resource type="GDScript" id="GDScript_vd8ay"]
-script/source = "extends HSlider
-
-func _on_value_changed(value: float) -> void:
-	Engine.time_scale = value
-"
 
 [sub_resource type="Gradient" id="Gradient_vd8ay"]
 interpolation_mode = 1
@@ -73,7 +66,7 @@ transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75
 shadow_enabled = true
 
 [node name="CharacterBody3D" type="CharacterBody3D" parent="." node_paths=PackedStringArray("input_space")]
-script = ExtResource("1_a202f")
+script = ExtResource("1_l7n73")
 input_space = NodePath("../Camera3D")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
@@ -87,7 +80,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.54243, 0)
 
 [node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("_follow_target")]
 transform = Transform3D(0.757451, 0.275098, -0.592106, 0, 0.906897, 0.421352, 0.652892, -0.319154, 0.68693, -4.73685, 4.91325, 5.49544)
-script = ExtResource("2_noarx")
+script = ExtResource("2_2p61m")
 EXPODENTIAL_MULTIPLIER = 50.0
 _follow_target = NodePath("../CharacterBody3D/CamPivot")
 camera_rotation_degrees = Vector3(-24.92, -40.76, 0)
@@ -97,23 +90,6 @@ _targets_position_damp = 0.233
 _look_ahead_damp = 0.371
 _zoom_damp = 0.5
 _rotation_damp = 0.105
-
-[node name="HSlider" type="HSlider" parent="."]
-offset_left = 8.0
-offset_top = 23.0
-offset_right = 163.0
-offset_bottom = 54.0
-max_value = 1.0
-step = 0.0
-value = 1.0
-script = SubResource("GDScript_vd8ay")
-
-[node name="Label" type="Label" parent="HSlider"]
-layout_mode = 0
-offset_top = -17.0
-offset_right = 78.0
-offset_bottom = 6.0
-text = "TimeScale"
 
 [node name="Level" type="Node3D" parent="."]
 
@@ -176,5 +152,3 @@ skeleton = NodePath("../..")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Level/Ground5/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_wc5p8")
-
-[connection signal="value_changed" from="HSlider" to="HSlider" method="_on_value_changed"]

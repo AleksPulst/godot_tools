@@ -102,7 +102,7 @@ func _input(event: InputEvent) -> void:
 func _ready() -> void:
 	# Locks the mouse to the center of the screen and set the damp position to its inital position.
 	if not Engine.is_editor_hint():
-		Input.set_mouse_mode(Input.MOUSE_MODE_CONFINED)
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	_damped_target_position = _follow_target.global_position
 	_damped_distance = _distance
 	_damped_rotation_degrees = camera_rotation_degrees
