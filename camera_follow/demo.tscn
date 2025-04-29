@@ -1,7 +1,8 @@
-[gd_scene load_steps=17 format=3 uid="uid://dwcrvcjpbp7qq"]
+[gd_scene load_steps=21 format=3 uid="uid://dwcrvcjpbp7qq"]
 
 [ext_resource type="Script" uid="uid://c04f3gb1i5yxw" path="res://camera_follow/character_body_3d.gd" id="1_l7n73"]
 [ext_resource type="Script" uid="uid://dtwtlmwig4ymd" path="res://camera_follow/follow_camera.gd" id="2_2p61m"]
+[ext_resource type="Script" uid="uid://cvu5u66xbpfx1" path="res://camera_follow/tank.gd" id="3_2p61m"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_noarx"]
 sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
@@ -19,6 +20,8 @@ glow_enabled = true
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_jsk3o"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_4arys"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_l7n73"]
 
 [sub_resource type="Gradient" id="Gradient_vd8ay"]
 interpolation_mode = 1
@@ -56,6 +59,10 @@ size = Vector2(20, 20)
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_wc5p8"]
 data = PackedVector3Array(10, 0, 10, -10, 0, 10, 10, 0, -10, -10, 0, 10, -10, 0, -10, 10, 0, -10)
 
+[sub_resource type="BoxMesh" id="BoxMesh_2p61m"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_d1txk"]
+
 [node name="CameraTestScene" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -66,6 +73,8 @@ transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75
 shadow_enabled = true
 
 [node name="CharacterBody3D" type="CharacterBody3D" parent="." node_paths=PackedStringArray("input_space")]
+process_mode = 4
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.20329, 0, 1.40446)
 script = ExtResource("1_l7n73")
 input_space = NodePath("../Camera3D")
 
@@ -75,21 +84,29 @@ shape = SubResource("CapsuleShape3D_jsk3o")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D"]
 mesh = SubResource("CapsuleMesh_4arys")
 
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="CharacterBody3D"]
+transform = Transform3D(0.749086, 0, 0, 0, 0.0924582, 0.330753, 0, -0.731882, 0.0417838, 0, 0.476553, -0.24432)
+mesh = SubResource("BoxMesh_l7n73")
+
 [node name="CamPivot" type="Node3D" parent="CharacterBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.54243, 0)
 
 [node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("_follow_target")]
-transform = Transform3D(0.757451, 0.275098, -0.592106, 0, 0.906897, 0.421352, 0.652892, -0.319154, 0.68693, -4.73685, 4.91325, 5.49544)
+transform = Transform3D(1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 4.87155, 8.57235)
 script = ExtResource("2_2p61m")
 EXPODENTIAL_MULTIPLIER = 50.0
-_follow_target = NodePath("../CharacterBody3D/CamPivot")
-camera_rotation_degrees = Vector3(-24.92, -40.76, 0)
-_distance = 8.0
+_follow_target = NodePath("../Tank/Camera_position")
+camera_rotation_degrees = Vector3(-20, 0, 0)
+use_mouse_motion = false
+use_follow_target_as_base_transform = true
+_distance = 13.0
+_min_distance = 8.0
+_max_distance = 15.0
 _look_ahead_amount = 3.0
-_targets_position_damp = 0.233
-_look_ahead_damp = 0.371
+_targets_position_damp = 0.402
+_look_ahead_damp = 0.569
 _zoom_damp = 0.5
-_rotation_damp = 0.105
+_rotation_damp = 0.135
 
 [node name="Level" type="Node3D" parent="."]
 
@@ -152,3 +169,25 @@ skeleton = NodePath("../..")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Level/Ground5/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_wc5p8")
+
+[node name="Tank" type="CharacterBody3D" parent="."]
+script = ExtResource("3_2p61m")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Tank"]
+mesh = SubResource("BoxMesh_2p61m")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="Tank/MeshInstance3D"]
+transform = Transform3D(1, 0, 0, 0, 0.470745, 0, 0, 0, 1.84264, 0, -0.263809, -0.0933268)
+mesh = SubResource("BoxMesh_2p61m")
+skeleton = NodePath("../..")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="Tank/MeshInstance3D"]
+transform = Transform3D(0.348638, 0, 0, 0, 0.219122, -0.962779, 0, 0.134278, 1.57111, -0.11273, 0.407757, -0.580374)
+mesh = SubResource("BoxMesh_2p61m")
+skeleton = NodePath("../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Tank"]
+shape = SubResource("BoxShape3D_d1txk")
+
+[node name="Camera_position" type="Node3D" parent="Tank"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.425284, -3.64366)

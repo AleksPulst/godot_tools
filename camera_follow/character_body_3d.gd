@@ -43,4 +43,12 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 		velocity.z = move_toward(velocity.z, 0, SPEED)
 
+
+	var looking_at : Basis
+	if get_real_velocity().length_squared() > 2:
+		looking_at = Basis.looking_at(get_real_velocity())
+	else:
+		looking_at = global_basis
+	global_basis = global_basis.slerp(looking_at,delta)
+
 	move_and_slide()

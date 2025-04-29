@@ -1,4 +1,6 @@
 @tool
+## A Camera behaviour script that has smoothing and targets tracking.
+## Tank like camera works but setting the use_follow_target_as_base_transform to true and mouse motion false.
 extends Camera3D
 
 ## Multiplier for damp values to simplify the numbers that are exposed to the editor.
@@ -17,6 +19,10 @@ extends Camera3D
 
 ## Is the mouse motion used to change the cameras oriantation.
 @export var use_mouse_motion : bool = true
+
+@export var use_follow_target_as_base_transform : bool = false
+
+var base_camera_rotation : Vector3
 
 @export_subgroup("Position")
 
@@ -80,6 +86,8 @@ var _damped_look_ahead_position : Vector3 = Vector3.ZERO
 
 var _velocity : Vector3 = Vector3.ZERO
 var _position_last_frame : Vector3 = Vector3.ZERO
+
+
 ## The Input function is used to listen to direct mouse inputs instead of the input system.
 func _input(event: InputEvent) -> void:
 
@@ -105,43 +113,51 @@ func _ready() -> void:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	_damped_target_position = _follow_target.global_position
 	_damped_distance = _distance
-	_damped_rotation_degrees = camera_rotation_degrees
+	if use_follow_target_as_base_transform:
+		base_camera_rotation = _follow_target.global_rotation_degrees
+	_damped_rotation_degrees = camera_rotation_degrees + base_camera_rotation
 	_damped_look_ahead_position = Vector3.ZERO
 	_position_last_frame = _follow_target.global_position
 
+
+
 func _process(delta: float) -> void:
-	update_damp_values(delta)
+	_update_damp_values(delta)
 	# The camera rotation and position are set in the process function to keep it as smooth as possible.
 	global_rotation_degrees = get_target_rotation_degrees()
 	global_position = get_target_position()
-
-	if not Engine.is_editor_hint():
-		if Input.is_action_just_pressed("ui_up"):
-			Engine.time_scale += 0.1
-		elif Input.is_action_just_pressed("ui_down"):
-			Engine.time_scale -= 0.1
 
 func _physics_process(delta: float) -> void:
 	_velocity = (_follow_target.global_position - _position_last_frame)/delta
 	_position_last_frame = _follow_target.global_position
 
-func update_damp_values(delta : float):
+## Updates to position and rotation damping values using expodential decay so that changin the time scale will also change the damping.
+func _update_damp_values(delta : float):
 
+	# If timescale is 0 then nothing is moving anyways so we can return the function.
 	if Engine.time_scale <= 0 : return
 
-
 	# using expodential decay to remove frame dependency.
+	# camera position damping
 	var pos_damp_t : float = 1.0-pow(_targets_position_damp**4,delta)
 	_damped_target_position = _damped_target_position.lerp(_follow_target.global_position,pos_damp_t)
 
-
+	# Camera look ahead position damping.
 	var look_ahead_damp_t : float = 1.0 - pow(_look_ahead_damp**4,delta)
 	var look_ahead_pos : Vector3 = (_velocity.limit_length(1.0) * _look_ahead_amount)
 	_damped_look_ahead_position = _damped_look_ahead_position.lerp(look_ahead_pos,look_ahead_damp_t)
 
-	# TODO create separate axis for the rotation damper
+	# Camera rotation damping.
 	var rotation_damp_t : float = 1.0 - pow(_rotation_damp**4,delta)
-	_damped_rotation_degrees = _damped_rotation_degrees.lerp(camera_rotation_degrees,rotation_damp_t)
+	var target_rotation : Vector3
+	if use_follow_target_as_base_transform:
+		target_rotation = camera_rotation_degrees + _follow_target.global_rotation_degrees
+	else :
+		target_rotation = camera_rotation_degrees
+	# Every axis has to be separetly lerped to prevent the rotation from looping around. Slerp might also work just didnt think of it before it was done.
+	_damped_rotation_degrees.x = rad_to_deg(lerp_angle(deg_to_rad(_damped_rotation_degrees.x), deg_to_rad(target_rotation.x), rotation_damp_t))
+	_damped_rotation_degrees.z = rad_to_deg(lerp_angle(deg_to_rad(_damped_rotation_degrees.z), deg_to_rad(target_rotation.z), rotation_damp_t))
+	_damped_rotation_degrees.y = rad_to_deg(lerp_angle(deg_to_rad(_damped_rotation_degrees.y), deg_to_rad(target_rotation.y), rotation_damp_t))
 
 	var damp_t : float = 1.0- pow(_zoom_damp**4,delta)
 	_damped_distance = lerpf(_damped_distance,_distance,damp_t)
